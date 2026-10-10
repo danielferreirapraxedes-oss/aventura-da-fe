@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aventura da Fé RPG</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ---------- MAPA ---------- */
+        #mapa {
+            width: 2000px;
+            height: 1200px;
+            position: relative;
+            background: #5dbb63;
+        }
+
+        #jogador {
+            position: absolute;
+            left: 300px;
+            top: 500px;
+            width: 64px;
+            height: 64px;
+            background-image: url("sprites/jogador-baixo.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 100;
+        }
+
+        #igreja {
+            position: absolute;
+            left: 700px;
+            top: 400px;
+            width: 180px;
+            height: 180px;
+            background-image: url("sprites/igreja.png");
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+
+        #npc {
+            position: absolute;
+            left: 1000px;
+            top: 500px;
+            width: 64px;
+            height: 64px;
+            background-image: url("sprites/pastor.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 50;
+        }
+
+        .arvore {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background-image: url("sprites/arvore.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .fruta {
+            position: absolute;
+            font-size: 20px;
+            line-height: 1;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .barraca {
+            position: absolute;
+            top: 250px;
+            width: 140px;
+            height: 140px;
+            background-image: url("sprites/barraca.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        /* ---------- INVENTÁRIO ---------- */
+        #btnInventario {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 70px;
+            height: 70px;
+            border: none;
+            border-radius: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            background: #f7c948;
+            z-index: 5000;
+        }
+
+        #inventario {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 85%;
+            background: #e8d9ae;
+            border: 6px solid #6b4f1d;
+            border-radius: 20px;
+            z-index: 4000;
+            overflow: auto;
+        }
+
+        #abas {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 3px solid #6b4f1d;
+        }
+
+        .aba {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #conteudo {
+            padding: 20px;
+        }
+
+        .pagina {
+            display: none;
+        }
+
+        .item {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+                        /* ---------- FAIXA DE INSÍGNIAS ---------- */
+        .faixa {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 30px 10px;
+            flex-wrap: nowrap;
+        }
+
+        .faixa .insignia {
+            position: relative;
+            z-index: 1;
+            width: 110px;
+            height: 110px;
+        }
+
+        .faixa .insignia.bloqueada {
+            filter: brightness(0);
+            opacity: 0.2;
+        }
+
+        /* a "barra de ferro" que liga as 4 insígnias (só aparece com as 4) */
+        .faixa .barra {
+            position: absolute;
+            z-index: 0;
+            left: calc(50% - 250px);
+            width: 500px;
+            top: 50%;
+            height: 30px;
+            transform: translateY(-50%);
+            background: linear-gradient(to bottom, #e0cfbb 0 15%, #b6a78a 15% 75%, #8b7f6f 75% 100%);
+            border: 4px solid #130c02;
+        }
+
+        /* ---------- CONTADOR DE ACERTOS ---------- */
+        #hud {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 5000;
+        }
+
+        /* ---------- MINIMAPA REDONDO ---------- */
+        #minimapa {
+            position: fixed;
+            top: 70px;
+            left: 15px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #12261c;
+            border: 5px solid #f7c948;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        #miniMundo {
+            position: absolute;
+            left: 0;
+            top: 0;
+            will-change: transform;
+        }
+
+        #miniChao {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #5dbb63;
+        }
+
+        .miniMarca {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            line-height: 1;
+            font-size: 14px;
+        }
+
+        #miniJogador {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 12px;
+            transform: translate(-50%, -50%);
+            background: #ff3b30;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 4px black;
+        }
+
+        /* ---------- CALENDÁRIO / CAMPORI ---------- */
+        #calendario {
+            position: fixed;
+            top: 230px;
+            left: 15px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1.5;
+            z-index: 3000;
+        }
+
+        #calendario.camporiHoje {
+            background: #f7c948;
+            color: #3b2a05;
+        }
+
+        #bannerDia {
+            display: none;
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 26px;
+            background: #f7c948;
+            color: #3b2a05;
+            border: 4px solid #6b4f1d;
+            border-radius: 16px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+            z-index: 6000;
+            max-width: 90%;
+        }
+
+        #campori {
+            position: absolute;
+            left: 1250px;
+            top: 900px;
+            width: 260px;
+            height: 170px;
+            visibility: hidden;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 48px;
+            background: radial-gradient(circle, #c9a56a 0%, #a9854a 100%);
+            border: 4px dashed #6b4f1d;
+            border-radius: 20px;
+            z-index: 10;
+            user-select: none;
+        }
+
+        #campori .camporiTitulo {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 2px 14px;
+            background: #9b1c31;
+            color: white;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* ---------- LOGIN ---------- */
+        .telaLogin {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #0f172a, #1e3a8a);
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+
+        #login {
+            display: flex;
+        }
+
+        #loginJogo {
+            display: none;
+        }
+
+        .caixaLogin {
+            background: rgba(255, 255, 255, 0.95);
+            width: 420px;
+            max-width: 90%;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .caixaLogin h1 {
+            font-size: 32px;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .caixaLogin input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 18px;
+        }
+
+        .caixaLogin button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 12px;
+            background: #f7c948;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .caixaLogin button:hover {
+            transform: scale(1.03);
+        }
+
+                .caixaLogin button.secundario {
+            background: transparent;
+            border: 2px solid #1e3a8a;
+            color: #1e3a8a;
+            font-size: 17px;
+        }
+
+                /* ---------- DENTRO DA IGREJA ---------- */
+        #igrejaInterior {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(90deg, #8a5a2b 0 80px, #7a4e24 80px 84px);
+            z-index: 85000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        #igrejaInterior::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 220px;
+            transform: translateX(-50%);
+            background: #9b1c31;
+            border-left: 6px solid #e8c15a;
+            border-right: 6px solid #e8c15a;
+        }
+
+        #igrejaTitulo {
+            position: relative;
+            font-size: 34px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 6px black;
+        }
+
+        #quadroMissoes {
+            position: relative;
+            width: 600px;
+            max-width: 92%;
+            max-height: 65%;
+            overflow: auto;
+            background: #f1e2b6;
+            border: 12px solid #5b3a17;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        #quadroMissoes h2 {
+            text-align: center;
+            color: #5b3a17;
+            margin-bottom: 10px;
+        }
+
+        .missao {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .missao.feita {
+            background: #c9efc9;
+        }
+
+        #btnSairIgreja {
+            position: relative;
+            padding: 14px 26px;
+            border: none;
+            border-radius: 12px;
+            background: #f7c948;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #dica {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 22px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            border-radius: 12px;
+            font-size: 18px;
+            z-index: 5000;
+        }
+
+        /* ---------- POPUP DA PERGUNTA ---------- */
+        #caixaPergunta {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 90000;
+        }
+
+        #perguntaBox {
+            width: 500px;
+            max-width: 90%;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #perguntaBox h2 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+
+        #textoPergunta {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #perguntaBox button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #f7c948;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        #perguntaBox button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* ---------- VERSÃO CELULAR ---------- */
+        body {
+            touch-action: manipulation;
+        }
+
+        #perguntaBox {
+            max-height: 94%;
+            overflow: auto;
+        }
+
+        #controles {
+            display: none;
+        }
+
+        #dpad {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 56px);
+            grid-template-rows: repeat(3, 56px);
+            grid-template-areas: ". cima ." "esq . dir" ". baixo .";
+            gap: 4px;
+            z-index: 3500;
+        }
+
+        .btnMov,
+        #btnAcao {
+            border: none;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.45);
+            color: white;
+            font-size: 24px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #btnAcao {
+            position: fixed;
+            right: 22px;
+            bottom: 40px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(247, 201, 72, 0.92);
+            color: #222;
+            font-size: 34px;
+            font-weight: bold;
+            z-index: 3500;
+        }
+
+        /* celular / tela de toque: mostra os controles */
+        @media (pointer: coarse), (max-width: 700px) {
+            #controles {
+                display: block;
+            }
+
+            #dica {
+                bottom: 200px;
+            }
+        }
+
+        /* telas estreitas */
+        @media (max-width: 600px) {
+            .caixaLogin {
+                padding: 22px;
+            }
+
+            .caixaLogin h1 {
+                font-size: 24px;
+            }
+
+            .caixaLogin input {
+                font-size: 16px;
+            }
+
+            #minimapa {
+                width: 100px;
+                height: 100px;
+                top: 58px;
+                left: 10px;
+                border-width: 4px;
+            }
+
+            .miniMarca {
+                font-size: 10px;
+            }
+
+            #calendario {
+                top: 166px;
+                left: 10px;
+                font-size: 12px;
+                padding: 6px 9px;
+            }
+
+            #bannerDia {
+                font-size: 17px;
+                padding: 10px 16px;
+                top: 70px;
+            }
+
+            #hud {
+                font-size: 14px;
+                padding: 8px 12px;
+                top: 10px;
+                left: 10px;
+            }
+
+            #btnInventario {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+                top: 10px;
+                right: 10px;
+            }
+
+            #textoPergunta {
+                font-size: 18px;
+            }
+
+            #perguntaBox {
+                padding: 18px;
+            }
+
+            #perguntaBox button {
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            #igrejaTitulo {
+                font-size: 24px;
+            }
+
+            #quadroMissoes {
+                padding: 12px;
+                max-height: 60%;
+            }
+
+            .missao {
+                font-size: 14px;
+            }
+
+            .aba {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            .faixa {
+                gap: 12px;
+            }
+
+            .faixa .insignia {
+                width: 60px;
+                height: 60px;
+            }
+
+            .faixa .barra {
+                left: calc(50% - 108px);
+                width: 216px;
+                height: 20px;
+            }
+        }
+
+        /* celular deitado (pouca altura) */
+        @media (max-height: 500px) {
+            #igrejaTitulo {
+                font-size: 20px;
+            }
+
+            #quadroMissoes {
+                max-height: 55%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- MAPA (move com a câmera) -->
+    <div id="mapa">
+        <div id="jogador"></div>
+        <div id="igreja"></div>
+
+        <div class="arvore" style="left:1500px;top:100px;"></div>
+        <div class="arvore" style="left:1700px;top:250px;"></div>
+        <div class="arvore" style="left:1600px;top:900px;"></div>
+        <div class="arvore" style="left:1200px;top:600px;"></div>
+        <div class="arvore" style="left:900px;top:800px;"></div>
+        <div class="arvore" style="left:300px;top:150px;"></div>
+
+        <div class="barraca" style="left:350px;"></div>
+        <div class="barraca" style="left:520px;"></div>
+
+        <!-- acampamento do Campori (só aparece a cada 20 dias) -->
+        <div id="campori"><span class="camporiTitulo">CAMPORI</span>⛺ 🚩 ⛺</div>
+
+        <div id="npc"></div>
+    </div>
+
+    <!-- INVENTÁRIO (fora do mapa para ficar fixo na tela) -->
+    <div id="hud"></div>
+
+    <div id="calendario"></div>
+    <div id="bannerDia"></div>
+
+    <!-- MINIMAPA -->
+    <div id="minimapa">
+        <div id="miniMundo"><div id="miniChao"></div></div>
+        <div id="miniJogador"></div>
+    </div>
+    <button id="btnInventario">🎒</button>
+
+    <div id="inventario">
+        <div id="abas">
+            <button class="aba" onclick="abrirAba('insignias')">🏅 Insígnias</button>
+            <button class="aba" onclick="abrirAba('especialidades')">⭐ Especialidades</button>
+            <button class="aba" onclick="abrirAba('ferramentas')">🛠️ Ferramentas</button>
+        </div>
+
+        <div id="conteudo">
+            <div id="insignias" class="pagina">
+                <h2>🏅 Insígnias</h2>
+                <div id="itens"></div>
+                <div class="item" id="camporisInfo"></div>
+            </div>
+
+            <div id="especialidades" class="pagina">
+                <h2>⭐ Especialidades</h2>
+                <div class="item">Nenhuma especialidade ainda.</div>
+            </div>
+
+            <div id="ferramentas" class="pagina">
+                <h2>🛠️ Ferramentas</h2>
+                <div class="item">📖 Bíblia</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES DE TOQUE (celular) -->
+    <div id="controles">
+        <div id="dpad">
+            <button class="btnMov" data-tecla="w" style="grid-area:cima">▲</button>
+            <button class="btnMov" data-tecla="a" style="grid-area:esq">◀</button>
+            <button class="btnMov" data-tecla="d" style="grid-area:dir">▶</button>
+            <button class="btnMov" data-tecla="s" style="grid-area:baixo">▼</button>
+        </div>
+        <button id="btnAcao">E</button>
+    </div>
+
+    <!-- DENTRO DA IGREJA -->
+    <div id="dica"></div>
+
+    <div id="igrejaInterior">
+        <div id="igrejaTitulo">⛪ Igreja Adventista</div>
+
+        <div id="quadroMissoes">
+            <h2>📜 Quadro de Missões</h2>
+            <div id="listaMissoes"></div>
+        </div>
+
+        <button id="btnSairIgreja" onclick="sairIgreja()">🚪 Sair da igreja (Esc)</button>
+    </div>
+
+    <!-- POPUP DA PERGUNTA -->
+    <div id="caixaPergunta">
+        <div id="perguntaBox">
+            <h2>📖 Pergunta Bíblica</h2>
+            <p id="textoPergunta"></p>
+            <div id="opcoes"></div>
+            <p id="resultadoPergunta" style="margin-top:15px;font-weight:bold;"></p>
+            <div id="botoesFim" style="display:none;">
+                <button onclick="continuarPerguntas()">▶️ Continuar perguntas</button>
+                <button style="background:#d1d5db;" onclick="fecharPergunta()">⏹️ Parar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="login" class="telaLogin">
+        <div class="caixaLogin">
+            <h1>⛪ Aventura da Fé RPG</h1>
+
+            <p style="margin:15px 0;color:#444;font-style:italic;line-height:1.6;">
+                "Lâmpada para os meus pés é a tua palavra e luz para o meu caminho."
+                <br><br>
+                <b>Salmo 119:105</b>
+            </p>
+
+            <input type="text" id="usuarioCadastro" placeholder="Usuário">
+            <input type="email" id="emailCadastro" placeholder="E-mail">
+            <input type="password" id="senhaCadastro" placeholder="Senha">
+
+            <button onclick="cadastrar()">Cadastrar</button>
+            <button class="secundario" onclick="mostrarLogin()">Já tenho conta</button>
+        </div>
+    </div>
+
+    <!-- ENTRAR -->
+    <div id="loginJogo" class="telaLogin">
+        <div class="caixaLogin">
+            <h1>Entrar</h1>
+
+            <input type="text" id="usuarioLogin" placeholder="Usuário">
+            <input type="password" id="senhaLogin" placeholder="Senha">
+
+            <button onclick="entrarJogo()">Entrar no Jogo</button>
+            <button class="secundario" onclick="mostrarCadastro()">Criar nova conta</button>
+        </div>
+    </div>
+
+    <script src="perguntas.js"></script>
+    <script src="perguntas2.js"></script>
+    <script>
+        /* ================= LOGIN ================= */
+
+        // Se já existe conta salva, pula direto para a tela de entrar
+        if (localStorage.getItem("usuario")) {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("loginJogo").style.display = "flex";
+        }
+
+        function mostrarCadastro() {
+            document.getElementById("loginJogo").style.display = "none";
+            document.getElementById("login").style.display = "flex";
+        }
+
+        function mostrarLogin() {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("loginJogo").style.display = "flex";
+        }
+
+        function cadastrar() {
+            const usuario = document.getElementById("usuarioCadastro").value;
+            const email = document.getElementById("emailCadastro").value.trim();
+            const senha = document.getElementById("senhaCadastro").value;
+
+            if (usuario === "" || email === "" || senha === "") {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            // e-mail precisa ter @ e um domínio, ex: daniel@gmail.com
+            const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+            if (!emailValido) {
+                alert("E-mail inválido! Use um e-mail completo, como daniel@gmail.com ou daniel@hotmail.com");
+                return;
+            }
+
+            localStorage.setItem("usuario", usuario);
+            localStorage.setItem("email", email);
+            localStorage.setItem("senha", senha);
+
+            alert("Cadastro realizado com sucesso!");
+
+            document.getElementById("login").style.display = "none";
+            document.getElementById("loginJogo").style.display = "flex";
+        }
+
+        function entrarJogo() {
+            const usuario = document.getElementById("usuarioLogin").value;
+            const senha = document.getElementById("senhaLogin").value;
+
+            if (usuario === localStorage.getItem("usuario") &&
+                senha === localStorage.getItem("senha")) {
+                document.getElementById("loginJogo").style.display = "none";
+                jogoAtivo = true;
+                document.activeElement.blur();
+            } else {
+                alert("Usuário ou senha incorretos!");
+            }
+        }
+
+        // Apertar Enter nos campos faz o mesmo que clicar no botão
+        document.querySelectorAll("#login input").forEach(function (campo) {
+            campo.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") cadastrar();
+            });
+        });
+
+        document.querySelectorAll("#loginJogo input").forEach(function (campo) {
+            campo.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") entrarJogo();
+            });
+        });
+
+        /* ================= JOGO ================= */
+
+        const MAPA_LARGURA = 2000;
+        const MAPA_ALTURA = 1200;
+        const TAMANHO = 64;
+
+        let x = 300;
+        let y = 500;
+        let jogoAtivo = false;   // só fica true depois do login
+
+        const mapa = document.getElementById("mapa");
+        const jogador = document.getElementById("jogador");
+        const npc = document.getElementById("npc");
+        const igreja = document.getElementById("igreja");
+        const inventario = document.getElementById("inventario");
+        const btnInventario = document.getElementById("btnInventario");
+
+        /* ---------- Inventário ---------- */
+
+        btnInventario.onclick = function () {
+            inventario.style.display =
+                inventario.style.display === "block" ? "none" : "block";
+        };
+
+        function abrirAba(nome) {
+            document.querySelectorAll(".pagina").forEach(function (p) {
+                p.style.display = "none";
+            });
+            document.getElementById(nome).style.display = "block";
+        }
+
+        abrirAba("ferramentas");
+
+        /* ---------- Frutas nas árvores ---------- */
+
+        const frutasPorArvore = ["🍎", "🍊", "🍋", "🍎", "🍇", "🍊"];
+        // posições (em %) dentro da copa de cada árvore
+        const posicoesFrutas = [[35, 18], [55, 12], [68, 28], [30, 38], [50, 32], [62, 46]];
+
+        document.querySelectorAll(".arvore").forEach(function (arvore, i) {
+            const fruta = frutasPorArvore[i % frutasPorArvore.length];
+
+            posicoesFrutas.forEach(function (pos) {
+                const f = document.createElement("span");
+                f.className = "fruta";
+                f.textContent = fruta;
+                f.style.left = pos[0] + "%";
+                f.style.top = pos[1] + "%";
+                arvore.appendChild(f);
+            });
+        });
+
+        /* ---------- Minimapa ---------- */
+
+        const ESCALA_MINI = 0.1;   // 1px do minimapa = 10px do mapa
+        const miniMundo = document.getElementById("miniMundo");
+        const minimapa = document.getElementById("minimapa");
+
+        // chão do minimapa (tamanho do mapa inteiro, reduzido)
+        const miniChao = document.getElementById("miniChao");
+        miniChao.style.width = (MAPA_LARGURA * ESCALA_MINI) + "px";
+        miniChao.style.height = (MAPA_ALTURA * ESCALA_MINI) + "px";
+
+        function criarMarca(el, emoji) {
+            const m = document.createElement("span");
+            m.className = "miniMarca";
+            m.textContent = emoji;
+            m.style.left = ((el.offsetLeft + el.offsetWidth / 2) * ESCALA_MINI) + "px";
+            m.style.top = ((el.offsetTop + el.offsetHeight / 2) * ESCALA_MINI) + "px";
+            miniMundo.appendChild(m);
+            return m;
+        }
+
+        criarMarca(igreja, "⛪");
+        criarMarca(npc, "🧑");
+        document.querySelectorAll(".arvore").forEach(function (a) { criarMarca(a, "🌳"); });
+        document.querySelectorAll(".barraca").forEach(function (b) { criarMarca(b, "🎪"); });
+
+        // centraliza o minimapa no jogador
+        function atualizarMinimapa() {
+            const raio = minimapa.clientWidth / 2;
+            const px = (x + TAMANHO / 2) * ESCALA_MINI;
+            const py = (y + TAMANHO / 2) * ESCALA_MINI;
+            miniMundo.style.transform =
+                "translate(" + (raio - px) + "px," + (raio - py) + "px)";
+        }
+
+        /* ---------- Câmera ---------- */
+
+        function atualizarCamera() {
+            let camX = x - window.innerWidth / 2;
+            let camY = y - window.innerHeight / 2;
+
+            camX = Math.max(0, Math.min(camX, MAPA_LARGURA - window.innerWidth));
+            camY = Math.max(0, Math.min(camY, MAPA_ALTURA - window.innerHeight));
+
+            mapa.style.transform = "translate(" + (-camX) + "px," + (-camY) + "px)";
+            atualizarMinimapa();
+        }
+
+        atualizarCamera();
+        window.addEventListener("resize", atualizarCamera);
+
+        /* ---------- Perguntas ---------- */
+
+        let perguntaAberta = false;
+let perguntaAtual = null;
+let ultimaPergunta = -1;
+
+const ACERTOS_POR_INSIGNIA = 50;   // a cada 50 acertos ganha a próxima insígnia
+let acertos = Number(localStorage.getItem("acertos")) || 0;
+
+const insignias = [
+    { nome: "Abelhinhas Laboriosas", img: "sprites/insignia1.png" },
+    { nome: "Luminares", img: "sprites/insignia2.png" },
+    { nome: "Edificadores", img: "sprites/insignia3.png" },
+    { nome: "Mãos Ajudadoras", img: "sprites/insignia4.png" }
+];
+
+function insigniasGanhas() {
+    return Math.min(insignias.length, Math.floor(acertos / ACERTOS_POR_INSIGNIA));
+}
+
+// As perguntas ficam no arquivo perguntas.js
+const perguntas = BANCO_PERGUNTAS.map(function (q) {
+    return { texto: q[0], certa: q[1], erradas: q.slice(2) };
+});
+
+// "baralho": sorteia sem repetir até todas as perguntas terem saído
+let baralho = [];
+
+function proximaPergunta() {
+    if (baralho.length === 0) {
+        baralho = perguntas.map(function (_, i) { return i; })
+            .sort(function () { return Math.random() - 0.5; });
+
+        // evita repetir a última pergunta na virada do baralho
+        if (baralho.length > 1 && baralho[baralho.length - 1] === ultimaPergunta) {
+            baralho.unshift(baralho.pop());
+        }
+    }
+    ultimaPergunta = baralho.pop();
+    return perguntas[ultimaPergunta];
+}
+
+function atualizarProgresso() {
+    const ganhas = insigniasGanhas();
+    const completo = ganhas === insignias.length;
+
+    document.getElementById("hud").textContent = completo
+        ? "📖 Acertos: " + acertos + " 🏅 Todas as insígnias!"
+        : "📖 Acertos: " + acertos + "/" + ((ganhas + 1) * ACERTOS_POR_INSIGNIA);
+
+    let html = '<div class="faixa">';
+
+    // a barra só aparece quando o jogador tem as 4 insígnias
+    if (completo) {
+        html += '<div class="barra"></div>';
+    }
+
+    insignias.forEach(function (ins, i) {
+        const bloqueada = i >= ganhas ? " bloqueada" : "";
+        html += '<img class="insignia' + bloqueada + '" src="' + ins.img +
+            '" alt="' + ins.nome + '">';
+    });
+
+    html += '</div>';
+    html += '<div class="item">Insígnias: ' + ganhas + '/' + insignias.length +
+        ' — uma nova a cada ' + ACERTOS_POR_INSIGNIA + ' acertos.</div>';
+
+    document.getElementById("itens").innerHTML = html;
+}
+
+atualizarProgresso();
+
+function abrirPergunta() {
+    perguntaAtual = proximaPergunta();
+    perguntaAberta = true;
+    localStorage.setItem("falouPastor", "1");
+    atualizarDica();
+
+    document.getElementById("textoPergunta").textContent = perguntaAtual.texto;
+    document.getElementById("resultadoPergunta").textContent = "";
+    document.getElementById("botoesFim").style.display = "none";
+
+    // embaralha a ordem das opções
+    const opcoes = [perguntaAtual.certa].concat(perguntaAtual.erradas)
+        .sort(function () { return Math.random() - 0.5; });
+
+    const letras = ["A", "B", "C", "D"];
+    const divOpcoes = document.getElementById("opcoes");
+    divOpcoes.innerHTML = "";
+
+    opcoes.forEach(function (texto, idx) {
+        const btn = document.createElement("button");
+        btn.textContent = letras[idx] + ") " + texto;
+        btn.onclick = function () { responder(texto === perguntaAtual.certa); };
+        divOpcoes.appendChild(btn);
+    });
+
+    document.getElementById("caixaPergunta").style.display = "flex";
+}
+
+function responder(acertou) {
+    const resultado = document.getElementById("resultadoPergunta");
+
+    document.querySelectorAll("#opcoes button").forEach(function (b) {
+        b.disabled = true;
+    });
+
+    if (acertou) {
+        // no Campori vale TURBO X3
+        const ganho = ehCampori() ? TURBO_CAMPORI : 1;
+        const insigniasAntes = insigniasGanhas();
+
+        acertos += ganho;
+        localStorage.setItem("acertos", acertos);
+        atualizarProgresso();
+
+        const turbo = ganho > 1 ? "⚡ TURBO X" + ganho + " do Campori! +" + ganho + " acertos. " : "";
+
+        if (insigniasGanhas() > insigniasAntes) {
+            const n = insigniasGanhas();
+            resultado.textContent = turbo + "🎉 " + acertos + " acertos! Você ganhou a insígnia " + insignias[n - 1].nome + "! Abra a mochila 🎒";
+        } else {
+            resultado.textContent = turbo + "✅ Resposta certa! (" + acertos + " acertos)";
+        }
+        resultado.style.color = "green";
+    } else {
+        resultado.textContent = "❌ Resposta errada! A certa era: " + perguntaAtual.certa;
+        resultado.style.color = "red";
+    }
+
+    document.getElementById("botoesFim").style.display = "block";
+}
+
+function continuarPerguntas() {
+            abrirPergunta();   // sorteia e mostra a próxima pergunta
+        }
+
+        function fecharPergunta() {
+            document.getElementById("caixaPergunta").style.display = "none";
+            perguntaAberta = false;
+            atualizarDica();
+        }
+
+        /* ---------- Dias e Campori ---------- */
+
+        const DIAS_ENTRE_CAMPORI = 20;   // a cada 20 dias tem Campori
+        const TURBO_CAMPORI = 3;         // no Campori cada acerto vale X3
+        const SEGUNDOS_POR_DIA = 300;    // 1 dia no jogo = 5 minutos jogando
+
+        let dia = Number(localStorage.getItem("dia")) || 1;
+        let tempoDia = Number(localStorage.getItem("tempoDia")) || 0;
+        let camporisFeitos = JSON.parse(localStorage.getItem("camporisFeitos") || "[]");
+        let bannerInicial = false;
+        let timerBanner = null;
+
+        const campori = document.getElementById("campori");
+        const miniCampori = criarMarca(campori, "⛺");
+
+        function ehCampori() {
+            return dia % DIAS_ENTRE_CAMPORI === 0;
+        }
+
+        function jaParticipou() {
+            return ehCampori() && camporisFeitos.includes(dia / DIAS_ENTRE_CAMPORI);
+        }
+
+        function participarCampori() {
+            camporisFeitos.push(dia / DIAS_ENTRE_CAMPORI);
+            localStorage.setItem("camporisFeitos", JSON.stringify(camporisFeitos));
+            atualizarCalendario();
+            mostrarAviso("🎉 Você participou do Campori! Que dia abençoado!");
+        }
+
+        function atualizarCalendario() {
+            const hoje = ehCampori();
+            const faltam = DIAS_ENTRE_CAMPORI - (dia % DIAS_ENTRE_CAMPORI);
+            const cal = document.getElementById("calendario");
+
+            cal.innerHTML = "📅 Dia " + dia + "<br>" + (hoje
+                ? "⛺ HOJE é Campori!<br>⚡ TURBO X" + TURBO_CAMPORI + " nas perguntas!"
+                : "⛺ Campori em " + faltam + (faltam === 1 ? " dia" : " dias"));
+            cal.classList.toggle("camporiHoje", hoje);
+
+            campori.style.visibility = hoje ? "visible" : "hidden";
+            miniCampori.style.visibility = hoje ? "visible" : "hidden";
+
+            document.getElementById("camporisInfo").textContent =
+                "⛺ Camporis de que você participou: " + camporisFeitos.length;
+
+            atualizarDica();
+        }
+
+        function mostrarBannerDia() {
+            const b = document.getElementById("bannerDia");
+            b.textContent = ehCampori()
+                ? "⛺ Dia " + dia + " — Hoje é dia de Campori!"
+                : "📅 Dia " + dia;
+            b.style.display = "block";
+            clearTimeout(timerBanner);
+            timerBanner = setTimeout(function () { b.style.display = "none"; }, 4000);
+        }
+
+        // o tempo só passa depois do login
+        setInterval(function () {
+            if (!jogoAtivo) return;
+
+            if (!bannerInicial) {
+                bannerInicial = true;
+                mostrarBannerDia();
+            }
+
+            tempoDia++;
+
+            if (tempoDia >= SEGUNDOS_POR_DIA) {
+                tempoDia = 0;
+                dia++;
+                localStorage.setItem("dia", dia);
+                atualizarCalendario();
+                mostrarBannerDia();
+            }
+
+            localStorage.setItem("tempoDia", tempoDia);
+        }, 1000);
+
+        /* ---------- Igreja e quadro de missões ---------- */
+
+        let igrejaAberta = false;
+
+        function distanciaDe(el) {
+            const cx = x + TAMANHO / 2;
+            const cy = y + TAMANHO / 2;
+            const ex = el.offsetLeft + el.offsetWidth / 2;
+            const ey = el.offsetTop + el.offsetHeight / 2;
+            return Math.hypot(cx - ex, cy - ey);
+        }
+
+        const barracas = document.querySelectorAll(".barraca");
+        let barracasVisitadas = JSON.parse(localStorage.getItem("barracas") || "[]");
+
+        function verificarBarracas() {
+            let mudou = false;
+
+            barracas.forEach(function (b, i) {
+                if (!barracasVisitadas.includes(i) && distanciaDe(b) < 120) {
+                    barracasVisitadas.push(i);
+                    mudou = true;
+                }
+            });
+
+            if (mudou) {
+                localStorage.setItem("barracas", JSON.stringify(barracasVisitadas));
+            }
+        }
+
+        const META_FRUTAS = 12;
+        let frutasColetadas = Number(localStorage.getItem("frutas")) || 0;
+        let avisoAte = 0;
+
+        // árvore mais próxima que ainda tem fruta (ou null)
+        function arvorePerto() {
+            const cx = x + TAMANHO / 2;
+            const cy = y + TAMANHO / 2;
+            let melhor = null;
+            let menor = 110;
+
+            document.querySelectorAll(".arvore").forEach(function (a) {
+                if (!a.querySelector(".fruta")) return;
+                const d = Math.hypot(cx - (a.offsetLeft + 90), cy - (a.offsetTop + 65));
+                if (d < menor) {
+                    menor = d;
+                    melhor = a;
+                }
+            });
+
+            return melhor;
+        }
+
+        function mostrarAviso(texto) {
+            const dica = document.getElementById("dica");
+            dica.textContent = texto;
+            dica.style.display = "block";
+            avisoAte = Date.now() + 2000;
+            setTimeout(atualizarDica, 2050);
+        }
+
+        function colherFruta(arvore) {
+            const frutas = arvore.querySelectorAll(".fruta");
+            const f = frutas[frutas.length - 1];
+            const emoji = f.textContent;
+            f.remove();
+
+            frutasColetadas++;
+            localStorage.setItem("frutas", frutasColetadas);
+
+            if (frutasColetadas === META_FRUTAS) {
+                mostrarAviso("🎉 Você colheu " + META_FRUTAS + " frutas! Missão cumprida!");
+            } else {
+                mostrarAviso(emoji + " Fruta colhida! (" + Math.min(frutasColetadas, META_FRUTAS) + "/" + META_FRUTAS + ")");
+            }
+        }
+
+        function atualizarDica() {
+            const dica = document.getElementById("dica");
+
+            if (Date.now() < avisoAte && !perguntaAberta && !igrejaAberta) return;
+
+            if (perguntaAberta || igrejaAberta || !jogoAtivo) {
+                dica.style.display = "none";
+            } else if (distanciaDe(npc) < 120) {
+                dica.textContent = "Aperte E para falar com o pastor";
+                dica.style.display = "block";
+            } else if (distanciaDe(igreja) < 170) {
+                dica.textContent = "Aperte E para entrar na igreja";
+                dica.style.display = "block";
+            } else if (ehCampori() && !jaParticipou() && distanciaDe(campori) < 170) {
+                dica.textContent = "Aperte E para participar do Campori";
+                dica.style.display = "block";
+            } else if (arvorePerto()) {
+                dica.textContent = "Aperte E para colher uma fruta";
+                dica.style.display = "block";
+            } else {
+                dica.style.display = "none";
+            }
+        }
+
+        function renderizarMissoes() {
+            const falouPastor = localStorage.getItem("falouPastor") === "1";
+
+            const missoes = [
+                { texto: "Converse com o pastor", feita: falouPastor },
+                {
+                    texto: "Visite as barracas",
+                    feita: barracasVisitadas.length >= barracas.length,
+                    progresso: barracasVisitadas.length + "/" + barracas.length
+                },
+                {
+                    texto: "Colete " + META_FRUTAS + " frutas das árvores",
+                    feita: frutasColetadas >= META_FRUTAS,
+                    progresso: Math.min(frutasColetadas, META_FRUTAS) + "/" + META_FRUTAS
+                },
+                { texto: "Acerte sua primeira pergunta bíblica", feita: acertos >= 1 }
+            ];
+
+            insignias.forEach(function (ins, i) {
+                const meta = (i + 1) * ACERTOS_POR_INSIGNIA;
+                missoes.push({
+                    texto: "Acerte " + meta + " perguntas e ganhe a insígnia " + ins.nome,
+                    feita: acertos >= meta,
+                    progresso: Math.min(acertos, meta) + "/" + meta
+                });
+            });
+
+            const proximoCampori = Math.ceil(dia / DIAS_ENTRE_CAMPORI) * DIAS_ENTRE_CAMPORI;
+            const faltamDias = proximoCampori - dia;
+
+            missoes.push({
+                texto: ehCampori()
+                    ? (jaParticipou() ? "Você participou do Campori de hoje!" : "O Campori é HOJE! Vá ao acampamento no mapa")
+                    : "Participe do Campori (dia " + proximoCampori + ")",
+                feita: jaParticipou(),
+                progresso: ehCampori() ? "" : "faltam " + faltamDias + (faltamDias === 1 ? " dia" : " dias")
+            });
+
+            document.getElementById("listaMissoes").innerHTML = missoes.map(function (m) {
+                const marca = m.feita ? "✅" : "⬜";
+                const extra = (!m.feita && m.progresso) ? "<b>" + m.progresso + "</b>" : "";
+                return '<div class="missao' + (m.feita ? " feita" : "") + '">' +
+                    "<span>" + marca + " " + m.texto + "</span>" + extra + "</div>";
+            }).join("");
+        }
+
+        function abrirIgreja() {
+            igrejaAberta = true;
+            renderizarMissoes();
+            document.getElementById("igrejaInterior").style.display = "flex";
+            atualizarDica();
+        }
+
+        function sairIgreja() {
+            igrejaAberta = false;
+            document.getElementById("igrejaInterior").style.display = "none";
+            atualizarDica();
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (igrejaAberta && event.key === "Escape") sairIgreja();
+        });
+
+        /* ---------- Movimento e interação ---------- */
+
+        function acaoJogo(tecla) {
+
+            // não joga enquanto: não logou, popup aberto, inventário aberto ou digitando
+            if (!jogoAtivo) return;
+            if (perguntaAberta) return;
+            if (igrejaAberta) return;
+            if (inventario.style.display === "block") return;
+
+            if (tecla === "w") {
+                y -= 10;
+                jogador.style.backgroundImage = 'url("sprites/jogador-cima.png")';
+            }
+
+            if (tecla === "s") {
+                y += 10;
+                jogador.style.backgroundImage = 'url("sprites/jogador-baixo.png")';
+            }
+
+            if (tecla === "a") {
+                x -= 10;
+                jogador.style.backgroundImage = 'url("sprites/jogador-esquerda.png")';
+            }
+
+            if (tecla === "d") {
+                x += 10;
+                jogador.style.backgroundImage = 'url("sprites/jogador-direita.png")';
+            }
+
+            // limites do mapa
+            x = Math.max(0, Math.min(x, MAPA_LARGURA - TAMANHO));
+            y = Math.max(0, Math.min(y, MAPA_ALTURA - TAMANHO));
+
+            jogador.style.left = x + "px";
+            jogador.style.top = y + "px";
+
+            atualizarCamera();
+
+            // interações com a tecla E
+            if (tecla === "e") {
+                if (distanciaDe(npc) < 120) {
+                    abrirPergunta();
+                } else if (distanciaDe(igreja) < 170) {
+                    abrirIgreja();
+                } else if (ehCampori() && !jaParticipou() && distanciaDe(campori) < 170) {
+                    participarCampori();
+                } else if (arvorePerto()) {
+                    colherFruta(arvorePerto());
+                }
+            }
+
+            verificarBarracas();
+            atualizarDica();
+        }
+
+        // teclado
+        document.addEventListener("keydown", function (event) {
+            if (event.target.tagName === "INPUT") return;
+            acaoJogo(event.key.toLowerCase());
+        });
+
+        // toque: setas seguram para andar, botão E interage
+        document.querySelectorAll(".btnMov").forEach(function (btn) {
+            let timer = null;
+
+            function parar() {
+                clearInterval(timer);
+                timer = null;
+            }
+
+            btn.addEventListener("pointerdown", function (e) {
+                e.preventDefault();
+                parar();
+                acaoJogo(btn.dataset.tecla);
+                timer = setInterval(function () {
+                    acaoJogo(btn.dataset.tecla);
+                }, 50);
+            });
+
+            ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) {
+                btn.addEventListener(ev, parar);
+            });
+        });
+
+        document.getElementById("btnAcao").addEventListener("pointerdown", function (e) {
+            e.preventDefault();
+            acaoJogo("e");
+        });
+
+        // só aqui, quando tudo já foi declarado
+        atualizarCalendario();
+    </script>
+
+</body>
+
+</html>

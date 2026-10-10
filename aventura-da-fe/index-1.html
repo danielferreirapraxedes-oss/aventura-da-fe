@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f7c948">
+<title>Aventura da Fé</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#1e3a2f;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    text-align:center;
+    background:#2d5a3d;
+    padding:30px;
+    border-radius:15px;
+    width:350px;
+    box-shadow:0 0 15px rgba(0,0,0,.4);
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+input{
+    width:90%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    margin:15px 0;
+    font-size:16px;
+}
+
+button{
+    background:#f0c14b;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:18px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    background:#ddb347;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌎 Aventura da Fé</h1>
+
+    <p>Digite o nome do seu aventureiro:</p>
+
+    <input type="text" id="nome" placeholder="Seu nome">
+
+    <br>
+
+    <button onclick="comecarJogo()">Começar Aventura</button>
+</div>
+
+<script>
+function comecarJogo(){
+
+    const nome = document.getElementById("nome").value;
+
+    if(nome === ""){
+        alert("Digite seu nome!");
+        return;
+    }
+
+    localStorage.setItem("aventureiro", nome);
+
+    window.location.href = "mapa.html";
+}
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<script src="perguntas.js"></script>
+<script src="missoes.js"></script>
+<script src="insignias.js"></script>
+<script src="salvamento.js"></script>
+
+</body>
+</html>

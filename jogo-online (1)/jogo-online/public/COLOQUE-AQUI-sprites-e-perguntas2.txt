@@ -1,0 +1,5 @@
+Coloque nesta pasta (public), junto do index.html:
+- a pasta sprites  (com as imagens do jogo)
+- o arquivo perguntas2.js  (se voce tiver)
+O perguntas.js ja esta aqui.
+Depois pode apagar este arquivo de texto.
