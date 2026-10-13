@@ -122,6 +122,7 @@
 
         #abas {
             display: flex;
+            flex-wrap: wrap;   /* com 4 abas, quebra a linha no celular */
             gap: 10px;
             padding: 15px;
             border-bottom: 3px solid #6b4f1d;
@@ -318,6 +319,145 @@
             font-size: 16px;
             font-weight: bold;
             letter-spacing: 2px;
+        }
+
+        /* ---------- SALA DA IA ---------- */
+        #salaIA {
+            position: absolute;
+            left: 400px;
+            top: 850px;
+            width: 210px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(#3b5bdb 0 28%, #e9ecff 28%);
+            border: 4px solid #1e2f8a;
+            border-radius: 14px;
+            font-size: 52px;
+            user-select: none;
+        }
+
+        #salaIA small {
+            font-size: 15px;
+            font-weight: bold;
+            color: #1e2f8a;
+            margin-top: 4px;
+        }
+
+        #caixaIA {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 90000;
+        }
+
+        #iaBox {
+            width: 520px;
+            max-width: 94%;
+            height: 560px;
+            max-height: 92%;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #iaTopo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: #3b5bdb;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #iaTopo button {
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #iaAviso {
+            padding: 6px 14px;
+            background: #fff6d6;
+            color: #5a4600;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        #iaMensagens {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f4f6ff;
+        }
+
+        .iaMsg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .iaMsg.eu {
+            align-self: flex-end;
+            background: #3b5bdb;
+            color: white;
+        }
+
+        .iaMsg.ia {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #cfd6ff;
+        }
+
+        #iaForm {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        #iaTexto {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #cfd6ff;
+            border-radius: 10px;
+        }
+
+        #iaEnviar {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #3b5bdb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #iaEnviar:disabled {
+            background: #9aa7e8;
+            cursor: wait;
         }
 
         /* ---------- LOGIN ---------- */
@@ -732,6 +872,9 @@
         <!-- acampamento do Campori (só aparece a cada 20 dias) -->
         <div id="campori"><span class="camporiTitulo">CAMPORI</span>⛺ 🚩 ⛺</div>
 
+        <!-- Sala da IA: conversa sobre a Bíblia -->
+        <div id="salaIA">🤖📖<small>Mestre da Palavra</small></div>
+
         <div id="npc"></div>
     </div>
 
@@ -753,6 +896,7 @@
             <button class="aba" onclick="abrirAba('insignias')">🏅 Insígnias</button>
             <button class="aba" onclick="abrirAba('especialidades')">⭐ Especialidades</button>
             <button class="aba" onclick="abrirAba('ferramentas')">🛠️ Ferramentas</button>
+            <button class="aba" onclick="abrirAba('placar')">🏆 Placar</button>
         </div>
 
         <div id="conteudo">
@@ -765,6 +909,11 @@
             <div id="especialidades" class="pagina">
                 <h2>⭐ Especialidades</h2>
                 <div class="item">Nenhuma especialidade ainda.</div>
+            </div>
+
+            <div id="placar" class="pagina">
+                <h2>🏆 Placar</h2>
+                <div id="listaPlacar"></div>
             </div>
 
             <div id="ferramentas" class="pagina">
@@ -813,6 +962,22 @@
         </div>
     </div>
 
+    <!-- CHAT DA IA -->
+    <div id="caixaIA">
+        <div id="iaBox">
+            <div id="iaTopo">
+                <span>🤖 Mestre da Palavra</span>
+                <button onclick="fecharIA()">Fechar (Esc)</button>
+            </div>
+            <div id="iaAviso">Eu sou uma inteligência artificial e posso errar. Confira sempre na Bíblia! 📖</div>
+            <div id="iaMensagens"></div>
+            <div id="iaForm">
+                <input id="iaTexto" type="text" maxlength="300" placeholder="Pergunte algo sobre a Bíblia..." autocomplete="off">
+                <button id="iaEnviar" onclick="enviarIA()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CADASTRO -->
     <div id="login" class="telaLogin">
         <div class="caixaLogin">
@@ -851,8 +1016,28 @@
     <script>
         /* ================= LOGIN ================= */
 
+        // Online = o jogo foi aberto por um servidor (http/https).
+        // Aberto direto do arquivo (file://), continua funcionando no modo antigo, sem placar.
+        // No GitHub Pages (github.io) não existe servidor, então também joga no modo local.
+        const ONLINE = location.protocol !== "file:" && !location.hostname.endsWith("github.io");
+        let iaAberta = false;      // janela do Mestre da Palavra aberta?
+        let token = null;          // "crachá" que o servidor dá ao entrar
+        let nomeJogador = "";
+
+        function pedirServidor(rota, corpo) {
+            return fetch(rota, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(corpo)
+            }).then(function (r) { return r.json(); });
+        }
+
+        function erroServidor() {
+            alert("Não consegui falar com o servidor. Espere um pouco e tente de novo.");
+        }
+
         // Se já existe conta salva, pula direto para a tela de entrar
-        if (localStorage.getItem("usuario")) {
+        if (ONLINE || localStorage.getItem("usuario")) {
             document.getElementById("login").style.display = "none";
             document.getElementById("loginJogo").style.display = "flex";
         }
@@ -885,6 +1070,17 @@
                 return;
             }
 
+            if (ONLINE) {
+                pedirServidor("/api/cadastro", { usuario: usuario, email: email, senha: senha })
+                    .then(function (r) {
+                        if (!r.ok) { alert(r.erro); return; }
+                        alert("Cadastro realizado com sucesso! Agora é só entrar.");
+                        mostrarLogin();
+                    })
+                    .catch(erroServidor);
+                return;
+            }
+
             localStorage.setItem("usuario", usuario);
             localStorage.setItem("email", email);
             localStorage.setItem("senha", senha);
@@ -898,6 +1094,23 @@
         function entrarJogo() {
             const usuario = document.getElementById("usuarioLogin").value;
             const senha = document.getElementById("senhaLogin").value;
+
+            if (ONLINE) {
+                pedirServidor("/api/login", { usuario: usuario, senha: senha })
+                    .then(function (r) {
+                        if (!r.ok) { alert(r.erro); return; }
+                        token = r.token;
+                        nomeJogador = r.usuario;
+                        acertos = r.acertos;                       // os acertos vêm do servidor
+                        localStorage.setItem("acertos", acertos);
+                        atualizarProgresso();
+                        document.getElementById("loginJogo").style.display = "none";
+                        jogoAtivo = true;
+                        document.activeElement.blur();
+                    })
+                    .catch(erroServidor);
+                return;
+            }
 
             if (usuario === localStorage.getItem("usuario") &&
                 senha === localStorage.getItem("senha")) {
@@ -951,6 +1164,37 @@
                 p.style.display = "none";
             });
             document.getElementById(nome).style.display = "block";
+            if (nome === "placar") carregarPlacar();
+        }
+
+        function carregarPlacar() {
+            const lista = document.getElementById("listaPlacar");
+
+            if (!ONLINE) {
+                lista.textContent = "O placar só funciona no modo online.";
+                return;
+            }
+
+            lista.textContent = "Carregando...";
+
+            fetch("/api/placar")
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    lista.innerHTML = "";
+                    if (!d.placar.length) {
+                        lista.textContent = "Ninguém pontuou ainda. Seja o primeiro!";
+                        return;
+                    }
+                    d.placar.forEach(function (j, i) {
+                        const linha = document.createElement("div");
+                        linha.className = "item";
+                        const posicao = ["🥇", "🥈", "🥉"][i] || (i + 1) + "º";
+                        linha.textContent = posicao + " " + j.usuario + " — " + j.acertos + " acertos";
+                        if (j.usuario === nomeJogador) linha.style.fontWeight = "bold";
+                        lista.appendChild(linha);
+                    });
+                })
+                .catch(function () { lista.textContent = "Não consegui carregar o placar."; });
         }
 
         abrirAba("ferramentas");
@@ -997,6 +1241,12 @@
 
         criarMarca(igreja, "⛪");
         criarMarca(npc, "🧑");
+        const miniIA = criarMarca(document.getElementById("salaIA"), "🤖");
+
+        if (!ONLINE) {   // sem servidor não há IA: esconde a sala e o ícone
+            document.getElementById("salaIA").style.visibility = "hidden";
+            miniIA.style.visibility = "hidden";
+        }
         document.querySelectorAll(".arvore").forEach(function (a) { criarMarca(a, "🌳"); });
         document.querySelectorAll(".barraca").forEach(function (b) { criarMarca(b, "🎪"); });
 
@@ -1125,6 +1375,21 @@ function abrirPergunta() {
     document.getElementById("caixaPergunta").style.display = "flex";
 }
 
+// manda o acerto para o servidor (só no modo online)
+function enviarAcerto(ganho) {
+    if (!ONLINE || !token) return;
+
+    pedirServidor("/api/acerto", { token: token, ganho: ganho })
+        .then(function (r) {
+            if (r.ok && r.acertos !== acertos) {   // o servidor manda no total
+                acertos = r.acertos;
+                localStorage.setItem("acertos", acertos);
+                atualizarProgresso();
+            }
+        })
+        .catch(function () { /* sem internet agora: segue jogando */ });
+}
+
 function responder(acertou) {
     const resultado = document.getElementById("resultadoPergunta");
 
@@ -1140,6 +1405,7 @@ function responder(acertou) {
         acertos += ganho;
         localStorage.setItem("acertos", acertos);
         atualizarProgresso();
+        enviarAcerto(ganho);
 
         const turbo = ganho > 1 ? "⚡ TURBO X" + ganho + " do Campori! +" + ganho + " acertos. " : "";
 
@@ -1329,15 +1595,18 @@ function continuarPerguntas() {
         function atualizarDica() {
             const dica = document.getElementById("dica");
 
-            if (Date.now() < avisoAte && !perguntaAberta && !igrejaAberta) return;
+            if (Date.now() < avisoAte && !perguntaAberta && !igrejaAberta && !iaAberta) return;
 
-            if (perguntaAberta || igrejaAberta || !jogoAtivo) {
+            if (perguntaAberta || igrejaAberta || iaAberta || !jogoAtivo) {
                 dica.style.display = "none";
             } else if (distanciaDe(npc) < 120) {
                 dica.textContent = "Aperte E para falar com o pastor";
                 dica.style.display = "block";
             } else if (distanciaDe(igreja) < 170) {
                 dica.textContent = "Aperte E para entrar na igreja";
+                dica.style.display = "block";
+            } else if (ONLINE && distanciaDe(document.getElementById("salaIA")) < 190) {
+                dica.textContent = "Aperte E para falar com o Mestre da Palavra (IA)";
                 dica.style.display = "block";
             } else if (ehCampori() && !jaParticipou() && distanciaDe(campori) < 170) {
                 dica.textContent = "Aperte E para participar do Campori";
@@ -1413,6 +1682,87 @@ function continuarPerguntas() {
             if (igrejaAberta && event.key === "Escape") sairIgreja();
         });
 
+        /* ---------- Mestre da Palavra (IA) ---------- */
+
+        const historicoIA = [];   // conversa enviada junto com cada pergunta
+
+        function addMensagemIA(quem, texto) {
+            const caixa = document.getElementById("iaMensagens");
+            const div = document.createElement("div");
+            div.className = "iaMsg " + quem;
+            div.textContent = texto;      // textContent: nada de HTML vindo da IA
+            caixa.appendChild(div);
+            caixa.scrollTop = caixa.scrollHeight;
+        }
+
+        function abrirIA() {
+            iaAberta = true;
+            document.getElementById("caixaIA").style.display = "flex";
+            atualizarDica();
+
+            if (!document.getElementById("iaMensagens").children.length) {
+                addMensagemIA("ia", ONLINE
+                    ? "Paz do Senhor! 🙏 Eu sou o Mestre da Palavra. Pode me perguntar o que quiser sobre a Bíblia!"
+                    : "A IA só funciona no jogo online. Abra o jogo pelo link do servidor.");
+            }
+
+            document.getElementById("iaTexto").focus();
+        }
+
+        function fecharIA() {
+            iaAberta = false;
+            document.getElementById("caixaIA").style.display = "none";
+            document.getElementById("iaTexto").blur();
+            atualizarDica();
+        }
+
+        function enviarIA() {
+            const campo = document.getElementById("iaTexto");
+            const botao = document.getElementById("iaEnviar");
+            const texto = campo.value.trim();
+
+            if (!texto || botao.disabled) return;
+            if (!ONLINE || !token) {
+                addMensagemIA("ia", "Entre no jogo online para falar comigo.");
+                return;
+            }
+
+            addMensagemIA("eu", texto);
+            campo.value = "";
+            botao.disabled = true;
+            addMensagemIA("ia", "Pensando... 🤔");
+            const pensando = document.getElementById("iaMensagens").lastChild;
+
+            pedirServidor("/api/ia", { token: token, mensagem: texto, historico: historicoIA })
+                .then(function (r) {
+                    if (r.ok) {
+                        pensando.textContent = r.resposta;
+                        historicoIA.push({ role: "user", content: texto });
+                        historicoIA.push({ role: "assistant", content: r.resposta });
+                        while (historicoIA.length > 8) historicoIA.shift();
+                    } else {
+                        pensando.textContent = "⚠️ " + r.erro;
+                    }
+                })
+                .catch(function () {
+                    pensando.textContent = "⚠️ Não consegui falar com o servidor. Tente de novo.";
+                })
+                .then(function () {
+                    botao.disabled = false;
+                    campo.focus();
+                    const caixa = document.getElementById("iaMensagens");
+                    caixa.scrollTop = caixa.scrollHeight;
+                });
+        }
+
+        document.getElementById("iaTexto").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") enviarIA();
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (iaAberta && event.key === "Escape") fecharIA();
+        });
+
         /* ---------- Movimento e interação ---------- */
 
         function acaoJogo(tecla) {
@@ -1421,6 +1771,7 @@ function continuarPerguntas() {
             if (!jogoAtivo) return;
             if (perguntaAberta) return;
             if (igrejaAberta) return;
+            if (iaAberta) return;
             if (inventario.style.display === "block") return;
 
             if (tecla === "w") {
@@ -1458,6 +1809,8 @@ function continuarPerguntas() {
                     abrirPergunta();
                 } else if (distanciaDe(igreja) < 170) {
                     abrirIgreja();
+                } else if (ONLINE && distanciaDe(document.getElementById("salaIA")) < 190) {
+                    abrirIA();
                 } else if (ehCampori() && !jaParticipou() && distanciaDe(campori) < 170) {
                     participarCampori();
                 } else if (arvorePerto()) {
