@@ -1,0 +1,12 @@
+{
+  "name": "aventura-da-fe",
+  "version": "1.0.0",
+  "description": "Servidor do jogo Aventura da Fé RPG (contas e placar online)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
